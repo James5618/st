@@ -28,3 +28,20 @@ sudo make install
 
 Run a compositor (picom) if you want transparency. On OpenBSD, remove `-lrt`
 from `$LIBS` in `config.mk` first.
+
+## FreeBSD
+
+This is the `freebsd` branch, built and installed the same way on FreeBSD 15.
+It differs from `master` only in `config.mk`: the headers and libraries come
+from `/usr/local` rather than `/usr/X11R6`. Nothing else needs changing —
+`st.c` already picks `<libutil.h>` for `forkpty(3)` on FreeBSD by itself, and
+that header does not depend on the BSD namespace, so `_XOPEN_SOURCE` stays.
+
+The two helper scripts the Makefile installs alongside st needed porting too:
+`st-copyout` used `tac`, `sed -i` with a `\x` escape and the `\s`/`\S` regex
+extensions, and `st-urlhandler` used `setsid(1)`. They now use `tail -r`, `tr`,
+character classes and `daemon(8)`.
+
+Build dependencies: `pkg install xorg libX11 libXft libXrender fontconfig
+freetype2 harfbuzz pkgconf`. The helpers additionally want `xclip` and
+`xdg-utils`.
